@@ -34,4 +34,10 @@ public class PrefabInstanciator : MonoBehaviour
             m_fCountDown -= Time.deltaTime;
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(transform.position, 0.2f);
+    }
 }
