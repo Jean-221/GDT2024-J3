@@ -28,20 +28,13 @@ public class Move : MonoBehaviour
 
     #region Unity methods
 
-
-        // Start is called before the first frame update
-        void Start()
-        {
-        
-        }
-
-        // Update is called once per frame
-        void Update()
+        void FixedUpdate()
         {
             if (m_vDir.magnitude != 0.0f)
             {
                 // this may need to use the normal from the ground someday
                 transform.position += m_vDir.normalized * m_fVelocity * Time.deltaTime;
+                transform.rotation = Quaternion.FromToRotation(Vector3.forward, m_vDir);
             }
         }
 

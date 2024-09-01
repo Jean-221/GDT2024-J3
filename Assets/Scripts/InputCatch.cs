@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // Bas solution, there are existing solution that might be better
 // Input and Ai could have a common base class
@@ -9,35 +10,51 @@ public class InputCatch : MonoBehaviour
 {
     #region Members
 
-        Move            m_cMoveComponent            = null;
+    Move            m_cMoveComponent            = null;
+    WallPower       m_cWallPowerComponent       = null;
 
-        Vector3         m_vInputs                   = Vector3.zero;                   
+    PlayerControls m_playerControls;
+    InputAction m_moveAction;
 
     #endregion
 
 
     #region Unity Methods
 
-        // Start is called before the first frame update
-        void Start()
-        {
-            m_cMoveComponent = gameObject.GetComponent<Move>();
-        }
+    private void Awake()
+    {
+        m_cMoveComponent = gameObject.GetComponent<Move>();
+        m_cWallPowerComponent = gameObject.GetComponent<WallPower>();
+        m_playerControls = new PlayerControls(); 
+    }
 
-        // Update is called once per frame
-        void Update()
-        {
-            m_vInputs.x = Input.GetAxis("Horizontal");
-            m_vInputs.z = Input.GetAxis("Vertical");
+    private void OnEnable()
+    {
+        m_moveAction = m_playerControls.Player.Move;
+        m_moveAction.Enable();
+        m_playerControls.Player.Fire.performed += OnFire;
+        m_playerControls.Player.Fire.Enable();
+    }
 
-            m_cMoveComponent.InputDir(m_vInputs);
+    private void OnDisable()
+    {
+        m_moveAction.Disable();
+        m_playerControls.Player.Fire.performed -= OnFire;
+        m_playerControls.Player.Fire.Disable();
+    }
 
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit info;
-            Physics.Raycast(ray, out info, 100.0f, LayerMask.GetMask("Ground"));
+    private void OnFire(InputAction.CallbackContext context)
+    {
+        Debug.Log("fireInput");
+        m_cWallPowerComponent.SpawnWall();
+    }
 
-            transform.LookAt(info.point + Vector3.up);
-        }
+    void FixedUpdate()
+    {
+        Vector2 moveDir = m_moveAction.ReadValue<Vector2>();
+
+        m_cMoveComponent.InputDir(new Vector3(moveDir.x, 0.0f, moveDir.y));
+    }
 
     #endregion
 }
